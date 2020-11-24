@@ -127,3 +127,46 @@ df_p = read_sav("pozitiv.sav")
 df_n = read_sav("negativ.sav")
 df = read_sav("kontrol.sav")
 
+
+### 9. rename variables ###
+
+library(dplyr)
+df = rename(df, 
+            # nemzeti identitas
+            nemz_id_1 = q32_1, nemz_id_2 = q32_2, nemz_id_3 = q32_3,
+            nemz_id_4 = q32_4, nemz_id_5 = q32_5, nemz_id_6 = q32_6,
+            nemz_id_7 = q32_7, nemz_id_8 = q32_8,
+            
+            # sztereotipiak: bevandorlok
+            sztip_bev_1 = q4_1, sztip_bev_2 = q4_2, sztip_bev_3 = q4_3,
+            sztip_bev_4 = q4_4, sztip_bev_5 = q4_5, sztip_bev_6 = q4_6,
+            sztip_bev_7 = q4_7, sztip_bev_8 = q4_8, sztip_bev_9 = q4_9,
+            sztip_bev_10 = q4_10, sztip_bev_11 = q4_11, sztip_bev_12 = q4_12,
+            sztip_bev_13 = q4_13, sztip_bev_14 = q4_14, sztip_bev_15 = q4_15,
+            
+            # sztereotipiak: menekultek
+            sztip_men_1 = q5_1, sztip_men_2 = q5_2, sztip_men_3 = q5_3,
+            sztip_men_4 = q5_4, sztip_men_5 = q5_5, sztip_men_6 = q5_6,
+            sztip_men_7 = q5_7, sztip_men_8 = q5_8, sztip_men_9 = q5_9,
+            sztip_men_10 = q5_10, sztip_men_11 = q5_11, sztip_men_12 = q5_12,
+            sztip_men_13 = q5_13, sztip_men_14 = q5_14, sztip_men_15 = q5_15,
+            
+            # sztereotipiak: kulfoldi egyetemistak
+            sztip_kEgy_1 = q6_1, sztip_kEgy_2 = q6_2, sztip_kEgy_3 = q6_3,
+            sztip_kEgy_4 = q6_4, sztip_kEgy_5 = q6_5, sztip_kEgy_6 = q6_6,
+            sztip_kEgy_7 = q6_7, sztip_kEgy_8 = q6_8, sztip_kEgy_9 = q6_9,
+            sztip_kEgy_10 = q6_10, sztip_kEgy_11 = q6_11, sztip_kEgy_12 = q6_12,
+            sztip_kEgy_13 = q6_13, sztip_kEgy_14 = q6_14, sztip_kEgy_15 = q6_15,
+            
+            # szomszedos
+            szomszed_1 = q13, szomszed_2 = q14, szomszed_3 = q15, 
+            szomszed_4 = q16, szomszed_5 = q17, szomszed_6 = q18, 
+            szomszed_7 = q19, szomszed_8 = q20, szomszed_9 = q21,
+            szomszed_10 = q22, szomszed_11 = q23, szomszed_12 = q24,
+            szomszed_13 = q25, szomszed_14 = q26, szomszed_15 = q27,
+            szomszed_16 = q28, szomszed_17 = q29, szomszed_18 = q30,
+            szomszed_19 = q31
+)
+
+
+

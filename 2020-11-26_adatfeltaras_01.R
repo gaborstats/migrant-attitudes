@@ -295,3 +295,22 @@ write_sav(df2, "pozitiv_2.sav")
 write_sav(df_n2, "negativ_2.sav")
 write_sav(df_p2, "kontrol_2.sav")
 
+
+
+### 5. vizualise missing data
+
+library(visdat)
+# s: https://cran.r-project.org/web/packages/visdat/readme/README.html
+
+vis_miss(df2[1:60])
+vis_miss(df2[61:101]) # kontaktot alig valaszoltak meg
+vis_miss(df2[102:163])
+
+names(df_p2)
+vis_miss(df_p2[1:60])
+vis_miss(df_p2[61:101]) # kontaktot alig valaszoltak meg
+vis_miss(df_p2[102:142])
+
+vis_miss(df_n2[1:60])
+vis_miss(df_n2[61:101]) # kontaktot alig valaszoltak meg
+vis_miss(df_n2[102:141])

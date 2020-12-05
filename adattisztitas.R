@@ -553,8 +553,6 @@ cat("Share of missing values in positive df is", mp, "%")
 mn = round(mean(is.na(df_short_n_4))*100, 3)
 cat("Share of missing values in negative df is", mn, "%")
 
-# (m + mp + mn) / 3
-
 
 
 setwd("C:/Users/Gabor/Documents/00_Vallalkozas/02_PPK/adatok/clean-data")
@@ -568,13 +566,6 @@ write_sav(df_short_p_4, "pozitiv_4.sav")
 df_full = dplyr::bind_rows(df_short_4, df_short_n_4)
 df_full2 = dplyr::bind_rows(df_full, df_short_p_4)
 
-
-# alapstatisztikak ellenorzese 
-
-dim(df_full2)
-names(df_full2)
-mt = round(mean(is.na(df_full2))*100, 1)
-cat("Share of missing values in full df is", mt, "%")
 
 # mentsuk el
 write_sav(df_full2, "dat.sav")

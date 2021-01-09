@@ -1,46 +1,53 @@
-setwd("C:/Users/Gabor/Documents/00_Vallalkozas/02_PPK/adatok")
+
+setwd("C:/Users/Gabor/Documents/00_Vallalkozas/02_PPK/adatok/01_data-cleaning")
 
 library(haven)
+library(dplyr)
 
-df_m = read_sav("minden.sav")
-df_temp = read_sav("tiszta98.sav")
-df_74 = read_sav("sav74.sav") # ebbol csak a q1_27 valtozo kell
+df_temp = haven::read_sav("tiszta98.sav")
+df_m = haven::read_sav("2012-01-05_minden.sav") # i-suffixes valtozok miatt kell, tartalmazza i10-et is a 2-es mintara.
+df_74 = haven::read_sav("sav74.sav") # ebbol csak a q1_27 valtozo kell
 
-#df_t = read_sav("tisztitott.sav")
-#df_67 = read_sav("v67.sav")
-#df_50 = read_sav("v50.sav")
-
-
-
+table(df_temp$q62_10, useNA = "ifany")
+table(df_m$q62_10, useNA = "ifany")
+table(df_temp$q62_10, useNA = "ifany")
+table(df_m$q62_10, useNA = "ifany")
 
 ############
 # join dfs #
 ############
 
 
-
-
 ### 1. irrelevans valtozok kiszurese ###
 
 
-df_temp_head = head(df_temp)
+# df_temp_head = head(df_temp)
+# names(df_temp_head)
 
-digi = names(df_temp)[247:487] # digi.biztonság
+d_1 = which(names(df_temp)=="q39") 
+d_2 = which(names(df_temp)=="q61_7")
+digi = names(df_temp)[d_1:d_2] # digi.biztonság
 
 
-m = which(names(df_temp)=="q7_1")
+m = which(names(df_temp)=="q7_1") # sztereotipia: zsido, roma, ffi, no, kabszerhasznalo, hetero
 n = which(names(df_temp)=="q12_15")
-mind_missing = names(df_temp)[m:n] # completely missing variables
-nyilt_kerdesek = c("q66_other", "q68_1comment", "q68_2comment", "q68_3comment", "q69_other", "q75a_other", "q76a_other", "q76b_other")
+o1 = which(names(df_temp)=="q62_1") # onertekeles
+o2 = which(names(df_temp)=="q62_10")
+mind_missing = names(df_temp)[c(m:n, o1:o2)] 
+# (almost) completely missing variables (egy valaszadon kivul senki nem valaszolta meg oket)
+
+# names(df_temp)[sapply(df_temp, function(x)all(is.na(x)))]
+# table(df_temp$q12_1, useNA = "always")
+
+# nyilt_kerdesek = c("q66_other", "q68_1comment", "q68_2comment", "q68_3comment", "q69_other", "q75a_other", "q76a_other", "q76b_other")
 
 num = c(2:4, 6, 554:559)
 egyeb_felesleges = names(df_temp)[num] # adatfelvetel technikai reszletei (lastpage, refurl) es szamolt valtozok (x1:valaszok)
 
-kivesz = c(digi, nyilt_kerdesek, mind_missing, egyeb_felesleges)
+kivesz = c(digi, mind_missing, egyeb_felesleges)
 
 df_98 = df_temp[ , -which(names(df_temp) %in% kivesz)] 
 rm(df_temp)
-
 
 
 
@@ -50,8 +57,7 @@ osz = c(1,5, 562:587)
 valt = names(df_m)[osz]
 df_m_small = df_m[,valt]
 
-library("dplyr")
-df_98_k = left_join(x = df_98, y = df_m_small, by = c("id","ipaddr"))
+df_98_k = dplyr::left_join(x = df_98, y = df_m_small, by = c("id","ipaddr"))
 
 
 # q1_27 változó kapcsolása a df_74 df-bol
@@ -65,6 +71,7 @@ df_98_j = left_join(x = df_98_k, y = df_74_small, by = c("id","ipaddr"))
 
 # df_98_j$q2 # Itt van benne: 
 # q2 Mennyire hasznos vagy artalmas a bevnadorlas? (L: q11)
+
 
 
 ### 3. duplikalt ID-k kezelese ###
@@ -84,9 +91,7 @@ df_98_j$ipaddr = NULL
 df_98_head = head(df_98)
 
 
-
 ### 4. valasszuk szet a mintakat ###
-
 
 df_m1_with_na = df_98_j[df_98_j$minta==1,]
 df_m2_with_na = df_98_j[df_98_j$minta==2,]
@@ -95,7 +100,6 @@ df_m3_with_na = df_98_j[df_98_j$minta==3,] # kontrol
 
 
 ### 5. toroljuk azokat a valtozokat, ahol az osszes ertek NA ###
-
 
 torol1 = names(df_m1_with_na)[sapply(df_m1_with_na, function(x)all(is.na(x)))]
 df_m1 = df_m1_with_na[, !(colnames(df_m1_with_na) %in% torol1)]
@@ -107,9 +111,7 @@ torol3 = names(df_m3_with_na)[sapply(df_m3_with_na, function(x)all(is.na(x)))]
 df_m3 = df_m3_with_na[, !(colnames(df_m3_with_na) %in% torol3)]
 
 
-
 ### 6. hany hianyzo adatunk van oszlopnkent a 3 mintaban ###
-
 
 p = as.data.frame(sapply(df_m1, function(x) sum(is.na(x))) )
 names(p) = "hianyzok_szama"
@@ -136,6 +138,11 @@ names(k) = "hianyzok_szama"
 # Konkluzio: az alom hogy olyan sorokkal dolgozzunk, ahol nincs NA ertek!
 
 
+# next step: nevezzuk at a valtozokat es NE soroljuk ki a "q" nevvel 
+# renedlk. valtozokat.
+# vegul ellenorizzuk le, h megvan-e minden, amit L-kert (figyeljunk, h ott
+# legyen az onertekeles is.)
+
 
 
 
@@ -160,8 +167,7 @@ df_n = df_m2
 # 8. rename variables in kontrol data set
 
 
-library(dplyr)
-df = rename(df, 
+df = dplyr::rename(df, 
             # nemzeti identitas
             nemz_id_1 = q32_1, nemz_id_2 = q32_2, nemz_id_3 = q32_3,
             nemz_id_4 = q32_4, nemz_id_5 = q32_5, nemz_id_6 = q32_6,
@@ -248,19 +254,10 @@ df = rename(df,
 )
 
 
-# soroljuk ki a valtozokat, amiknek neveben "q" szerepel
-
-v = names(df)
-new_var = v[!grepl("q", v, fixed = TRUE)]
-df2 = df[,dput(new_var)]
-
-
-
 # 9. rename variables in pozitiv data set
 
 
-library(dplyr)
-df_p = rename(df_p, 
+df_p = dplyr::rename(df_p, 
               # nemzeti identitas
               nemz_id_1 = q32_1, nemz_id_2 = q32_2, nemz_id_3 = q32_3,
               nemz_id_4 = q32_4, nemz_id_5 = q32_5, nemz_id_6 = q32_6,
@@ -342,20 +339,11 @@ df_p = rename(df_p,
 )
 
 
-# soroljuk ki a valtozokat, amiknek neveben "q" szerepel
-
-v2 = names(df_p)
-new_var2 = v2[!grepl("q", v2, fixed = TRUE)]
-df_p2 = df_p[,dput(new_var2)]
-
-
-
 # 10. rename variables in negativ data set
 
-names(df_n)
+# names(df_n)
 
-library(dplyr)
-df_n = rename(df_n, 
+df_n = dplyr::rename(df_n, 
               # nemzeti identitas
               nemz_id_1 = q32_1, nemz_id_2 = q32_2, nemz_id_3 = q32_3,
               nemz_id_4 = q32_4, nemz_id_5 = q32_5, nemz_id_6 = q32_6,
@@ -426,7 +414,7 @@ df_n = rename(df_n,
               # fenyegetettseg, hozzajarulas, multikult.
               # feny_19 = i19, feny_23 = i23, # nem leteznek
               feny_2 = i2, feny_6 = i6, feny_16 = i16, 
-              feny_24 = i24,
+              feny_24 = i24, feny_10 = i10,
               
               
               # kiegeszites
@@ -437,13 +425,6 @@ df_n = rename(df_n,
 )
 
 
-# soroljuk ki a valtozokat, amiknek neveben "q" szerepel
-
-v3 = names(df_n)
-new_var3 = v3[!grepl("q", v3, fixed = TRUE)]
-df_n2 = df_n[,dput(new_var3)]
-
-
 
 
 ##############################################
@@ -451,21 +432,9 @@ df_n2 = df_n[,dput(new_var3)]
 ##############################################
 
 
-
-# rename dfs for new session
-
-df = NULL
-df_n = NULL
-df_p = NULL
-
-df = df2 
-df_n = df_n2
-df_p = df_p2
-
-
 # tavolitsuk el a megfigyeleseket, akik danger kerdeseket en block kihagytak
 # 1046.sorig (excluded)
-names(df)
+# names(df)
 proba = df[,105:110]
 proba_p = df_p[,105:110]
 proba_n = df_n[,105:110]
@@ -478,32 +447,39 @@ df_short_n = df_n[245:nrow(df_n),]
 # remove cases where all diversity variables are missing
 
 # negatives
-proba_n = df_short_n[,130:137]
+div_s = which(names(df_short_n)=="div_1")
+div_e = which(names(df_short_n)=="div_8")
+
+proba_n = df_short_n[,div_s:div_e]
 count = rowSums(is.na(proba_n))
 i = count == 8
 df_short_n_2 = df_short_n[!i,]
 
 # pozitives
-proba_p = df_short_p[,130:137]
+div_s = which(names(df_short_p)=="div_1")
+div_e = which(names(df_short_p)=="div_8")
+
+proba_p = df_short_p[,div_s:div_e]
 i = NULL; count = NULL
 count = rowSums(is.na(proba_p))
 i = count == 8
 df_short_p_2 = df_short_p[!i,]
 
 # kontroll
-proba = df_short[,130:137]
+div_s = which(names(df_short_p)=="div_1")
+div_e = which(names(df_short_p)=="div_8")
+
+proba = df_short[,div_s:div_e]
 i = NULL; count = NULL
 count = rowSums(is.na(proba))
 i = count == 8
 df_short_2 = df_short[!i,]
 
 
-# remove variables > NA (kontakt, telip)
 
-names(df_short_2)
-kidob = c("teltip", "kont_w_1", "kont_e_1", "kont_w_2", "kont_e_2",
-          "kont_w_3", "kont_e_3", "kont_w_4", "kont_e_4", "kont_w_5",
-          "kont_e_5", "kont_w_6", "kont_e_6", "kont_w_7", "kont_e_7")
+# remove telip variable
+
+kidob = "teltip"
 
 df_short_3 = df_short_2[ , !(names(df_short_2) %in% kidob)]
 df_short_n_3 = df_short_n_2[ , !(names(df_short_n_2) %in% kidob)]
@@ -522,20 +498,28 @@ df_short_p_4 = df_short_p_3[-c(1:11), ]
 # visualization #
 #################
 
-
+dim(df_short_n)
 
 library(visdat)
 vis_miss(df_short_n_4[1:60])
-vis_miss(df_short_n_4[61:101]) 
-vis_miss(df_short_n_4[102:ncol(df_short_n_4)])
+vis_miss(df_short_n_4[61:101]) # kontakt erosen hianyos, de L kerte, h maradjon
+vis_miss(df_short_n_4[102:145])
+vis_miss(df_short_n_4[146:186])
+vis_miss(df_short_n_4[187:ncol(df_short_n_4)])
 
 vis_miss(df_short_p_4[1:60])
-vis_miss(df_short_p_4[61:101]) 
-vis_miss(df_short_p_4[102:ncol(df_short_p_4)])
+vis_miss(df_short_p_4[61:101]) # kontakt erosen hianyos, de L kerte, h maradjon
+vis_miss(df_short_p_4[102:145])
+vis_miss(df_short_p_4[146:186])
+vis_miss(df_short_p_4[187:ncol(df_short_p_4)])
 
 vis_miss(df_short_4[1:60])
-vis_miss(df_short_4[61:101]) 
-vis_miss(df_short_4[102:ncol(df_short_4)])
+vis_miss(df_short_4[61:101]) # kontakt erosen hianyos, de L kerte, h maradjon
+vis_miss(df_short_4[102:145])
+vis_miss(df_short_4[146:186])
+vis_miss(df_short_4[187:ncol(df_short_4)])
+
+
 
 # summary of data
 
@@ -544,28 +528,34 @@ dim(df_short_p_4)
 dim(df_short_n_4)
 
 # hianyzo adatok aranya
-m = round(mean(is.na(df_short_4))*100, 3)
+m = round(mean(is.na(df_short_4))*100, 1)
 cat("Share of missing values in control df is", m, "%")
 
-mp = round(mean(is.na(df_short_p_4))*100, 3)
+mp = round(mean(is.na(df_short_p_4))*100, 1)
 cat("Share of missing values in positive df is", mp, "%")
 
-mn = round(mean(is.na(df_short_n_4))*100, 3)
+mn = round(mean(is.na(df_short_n_4))*100, 1)
 cat("Share of missing values in negative df is", mn, "%")
 
 
+setwd("C:/Users/Gabor/Documents/00_Vallalkozas/02_PPK/adatok/01_data-cleaning/clean-data")
 
-setwd("C:/Users/Gabor/Documents/00_Vallalkozas/02_PPK/adatok/clean-data")
+write_sav(df_short_4, "2021_01_09_kontrol_4.sav")
+write_sav(df_short_n_4, "2021_01_09_negativ_4.sav")
+write_sav(df_short_p_4, "2021_01_09_pozitiv_4.sav")
 
-write_sav(df_short_4, "kontrol_4.sav")
-write_sav(df_short_n_4, "negativ_4.sav")
-write_sav(df_short_p_4, "pozitiv_4.sav")
 
 # bind the three samples together 
 
 df_full = dplyr::bind_rows(df_short_4, df_short_n_4)
 df_full2 = dplyr::bind_rows(df_full, df_short_p_4)
 
+dim(df_full2)
+
+# hianyzo adatok aranya
+mf = round(mean(is.na(df_full2))*100, 1)
+cat("Share of missing values in control df is", mf, "%")
+
 
 # mentsuk el
-write_sav(df_full2, "dat.sav")
+write_sav(df_full2, "2021_01_09_dat.sav")

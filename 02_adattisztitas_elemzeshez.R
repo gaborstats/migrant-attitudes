@@ -1,16 +1,31 @@
-setwd("C:/Users/Gabor/Documents/00_Vallalkozas/02_PPK/adatok/01_imputalas")
+setwd("C:/Users/Gabor/Documents/00_Vallalkozas/02_PPK/adatok/01_imputalas/round_2")
 library(haven)
 
 # adattisztitas az elemzés előkészítéséhez
 # prereq: imputed data sets from Samu
 
-df_imp = read_sav("dat_imputation_final_cimkekkel.sav")
+df_imp = read_sav("2021_01_16_dat_with_imputation.sav")
 
-df_imp_p = df_imp[df_imp$minta==1,] # pozitiv
-df_imp_n = df_imp[df_imp$minta==2,] 
-df_imp_k = df_imp[df_imp$minta==3,] # kontrol
 
-# dobjuk ki az NA valtozokat
+################################
+# fontos valtozok kivalasztasa #
+################################
+
+
+# dobjuk ki a valtozokat, amik nem lettek atnevezve (nevukben "q" szerepel)
+
+v2 = names(df_imp)
+new_var2 = v2[!grepl("q", v2, fixed = TRUE)] 
+df_imp_reduced = df_imp[,dput(new_var2)]
+
+
+df_imp_p = df_imp_reduced[df_imp_reduced$minta==1,] # pozitiv
+df_imp_n = df_imp_reduced[df_imp_reduced$minta==2,] 
+df_imp_k = df_imp_reduced[df_imp_reduced$minta==3,] # kontrol
+
+
+
+# dobjuk ki az completely NA valtozokat
 
 torol1 = names(df_imp_p)[sapply(df_imp_p, function(x)all(is.na(x)))]
 df_imp_p_wo_NA = df_imp_p[, !(colnames(df_imp_p) %in% torol1)]
@@ -19,12 +34,14 @@ torol2 = names(df_imp_n)[sapply(df_imp_n, function(x)all(is.na(x)))]
 df_imp_n_wo_NA = df_imp_n[, !(colnames(df_imp_n) %in% torol2)]
 
 
+
+
 #####################################
 # adatok elokeszitese az elemzeshez #
 #####################################
 
 
-df = df_imp
+df = df_imp_reduced
 df_k = df_imp_k
 df_p = df_imp_p_wo_NA
 df_n= df_imp_n_wo_NA
@@ -62,8 +79,8 @@ df_p$irsz = NULL
 
 # mentsuk el a felosztott adatbazisokat
 
-setwd("C:/Users/Gabor/Documents/00_Vallalkozas/02_PPK/adatok/01_imputalas")
+setwd("C:/Users/Gabor/Documents/00_Vallalkozas/02_PPK/adatok/01_imputalas/round_2")
 
-write_sav(df_k, "kontrol_imp.sav")
-write_sav(df_n, "negativ_imp.sav")
-write_sav(df_p, "pozitiv_imp.sav")
+write_sav(df_k, "2016-01-16_kontrol_imp.sav")
+write_sav(df_n, "2016-01-16_negativ_imp.sav")
+write_sav(df_p, "2016-01-16_pozitiv_imp.sav")

@@ -1,17 +1,12 @@
-
 setwd("C:/Users/Gabor/Documents/00_Vallalkozas/02_PPK/adatok/01_data-cleaning")
 
 library(haven)
 library(dplyr)
 
 df_temp = haven::read_sav("tiszta98.sav")
-df_m = haven::read_sav("2012-01-05_minden.sav") # i-suffixes valtozok miatt kell, tartalmazza i10-et is a 2-es mintara.
+df_m = haven::read_sav("2012-01-05_minden.sav") # i-suffixes valtozok miatt kell, tartalmazza q1a-t, es i10-et is a 2-es mintara.
 df_74 = haven::read_sav("sav74.sav") # ebbol csak a q1_27 valtozo kell
 
-table(df_temp$q62_10, useNA = "ifany")
-table(df_m$q62_10, useNA = "ifany")
-table(df_temp$q62_10, useNA = "ifany")
-table(df_m$q62_10, useNA = "ifany")
 
 ############
 # join dfs #
@@ -50,14 +45,15 @@ df_98 = df_temp[ , -which(names(df_temp) %in% kivesz)]
 rm(df_temp)
 
 
-
 ### 2. fenyegetettseg (i_) valtozok kapcsolasa ###
 
-osz = c(1,5, 562:587)
+osz = c(1,5, 561:587)
 valt = names(df_m)[osz]
 df_m_small = df_m[,valt]
 
 df_98_k = dplyr::left_join(x = df_98, y = df_m_small, by = c("id","ipaddr"))
+
+# which(names(df_98_k)=="q1a")
 
 
 # q1_27 változó kapcsolása a df_74 df-bol
@@ -538,11 +534,12 @@ mn = round(mean(is.na(df_short_n_4))*100, 1)
 cat("Share of missing values in negative df is", mn, "%")
 
 
+
 setwd("C:/Users/Gabor/Documents/00_Vallalkozas/02_PPK/adatok/01_data-cleaning/clean-data")
 
-write_sav(df_short_4, "2021_01_09_kontrol_4.sav")
-write_sav(df_short_n_4, "2021_01_09_negativ_4.sav")
-write_sav(df_short_p_4, "2021_01_09_pozitiv_4.sav")
+write_sav(df_short_4, "2021_01_16_kontrol_4.sav")
+write_sav(df_short_n_4, "2021_01_16_negativ_4.sav")
+write_sav(df_short_p_4, "2021_01_16_pozitiv_4.sav")
 
 
 # bind the three samples together 
@@ -552,10 +549,11 @@ df_full2 = dplyr::bind_rows(df_full, df_short_p_4)
 
 dim(df_full2)
 
+
 # hianyzo adatok aranya
 mf = round(mean(is.na(df_full2))*100, 1)
 cat("Share of missing values in control df is", mf, "%")
 
 
 # mentsuk el
-write_sav(df_full2, "2021_01_09_dat.sav")
+write_sav(df_full2, "2021_01_16_dat.sav")

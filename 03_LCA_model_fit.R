@@ -265,27 +265,12 @@ LCA_sztip_men_posterior = gof_posterior(lista = LCA_sztip_men)
 
 posterior_list = list(LCA_nemz_id_posterior, LCA_sztip_bev_posterior, LCA_sztip_men_posterior)
 
-# lehet, h a posteriort jo lenne tobb oszlopba szorni, 
-# es akkor a tizedesek vesszovel lennenek elvalasztva.
+
+
 
 # write outfile
 
 nevek = c("Nemzeti_ID", "Sztip_bev", "Sztip_men")
-
-library(openxlsx)
-of="LCA_model_fit4.xlsx"
-OUT <- createWorkbook()
-for(aaa in 1:length(LCA_fit_list))
-{
-  addWorksheet(OUT, nevek[aaa])
-  writeData(OUT, sheet = nevek[aaa], x = t(names(LCA_fit_list[[1]])), colNames = F)
-  writeData(OUT, sheet = nevek[aaa], x = LCA_fit_list[aaa], startRow = 2)
-  
-  writeData(OUT, sheet = nevek[aaa], x = "posterior", startCol = 6, startRow = 1, colNames = F)
-  writeData(OUT, sheet = nevek[aaa], x = t(t(posterior_list[[aaa]])), startCol = 6, startRow = 2, colNames = F)
-  
-}
-saveWorkbook(OUT,of)
 
 
 library(openxlsx)

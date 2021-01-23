@@ -307,8 +307,8 @@ formula_sztip_kEgy = cbind(sztip_kEgy_1, sztip_kEgy_2, sztip_kEgy_3, sztip_kEgy_
 formula_szomszed = cbind(szomszed_2, szomszed_10, szomszed_12, szomszed_15, szomszed_16, szomszed_17, szomszed_18, szomszed_19  
 ) ~ 1 
 
-formula_div = cbind(div_1, div_2, div_3, div_4, div_5, div_6, div_7, div_8  
-) ~ 1  # it az itemek kozott nem feltetelezunk fuggetlenseget? 
+formula_div = cbind(div_1, div_2, div_3, div_5, div_7, div_8 #, div_4, div_6  
+) ~ 1  # it az itemek kozott fuggetlenseget feltetelezunk (poLCA in JSS, p.3.; Everitt 1984: An Introduction to Lantent Variable Models, p.76.)
 
 formula_akkult = cbind(akkult_1, akkult_2, akkult_3, akkult_4, akkult_5  
 ) ~ 1 
@@ -380,7 +380,7 @@ nevek = c("Feny", "Hozzajar", "Multic", "Nemz_ID_egesz", "Nemz_ID_essen", "Dang_
 
 
 library(openxlsx)
-of="2021-01-23_LCA_model_fit.xlsx"
+of="2021-01-23_LCA_model_fit_02.xlsx"
 OUT <- createWorkbook()
 for(aaa in 1:length(LCA_fit_list)){
   
@@ -401,6 +401,5 @@ saveWorkbook(OUT,of)
 # vagy (SA)BIC platora fut. Nezzuk meg ketto kozott melyik relevansabb 
 # indikator a mi esetunkben, es javasoljuk azt.
 
-# 2.)
-# futtassuk le a tobbi valtozora is, ahogy L-kerte
-# ld.valtozocsokkentes fajl, aztan kesz vagyunk.
+# Q: entropy-nak lehet 2 clusternal is csucsa? 
+# RE: vszeg igen, ha utana folyamatosan csokken.

@@ -42,7 +42,7 @@ df_k$szomszed_19[df_k$szomszed_19==6]=3
 
 # names(df_k)
 
-setwd("C:/Users/Gabor/Documents/00_Vallalkozas/02_PPK/adatok/02_analysis/01_LCA/round_02/2021-01-23")
+setwd("C:/Users/Gabor/Documents/00_Vallalkozas/02_PPK/adatok/02_analysis/01_LCA/round_02/2021-01-30")
 
 
 
@@ -52,7 +52,7 @@ setwd("C:/Users/Gabor/Documents/00_Vallalkozas/02_PPK/adatok/02_analysis/01_LCA/
 
 # 1. LCA modell fv
 
-fit_LCA_model = function(formula = formula, data = df_k, n = 5){
+fit_LCA_model = function(formula = formula, data = df_k, n = 7){
   
   lcalist = list()
   
@@ -195,6 +195,23 @@ gof_LMR_LRT = function(lista = LCA_nemz_id){
                     alt_param = lista$fitlca5$npar, 
                     alt_classes = length(lista$fitlca5$P))[2]
   
+  LMR[6] = tidyLPA::calc_lrt(n =  lista$fitlca5$N,
+                             null_ll = lista$fitlca5$llik,
+                             null_param = lista$fitlca5$npar, 
+                             null_classes = length(lista$fitlca5$P), 
+                             alt_ll = lista$fitlca6$llik, 
+                             alt_param = lista$fitlca6$npar, 
+                             alt_classes = length(lista$fitlca6$P))[2]
+  
+  LMR[7] = tidyLPA::calc_lrt(n =  lista$fitlca6$N,
+                             null_ll = lista$fitlca6$llik,
+                             null_param = lista$fitlca6$npar, 
+                             null_classes = length(lista$fitlca6$P), 
+                             alt_ll = lista$fitlca7$llik, 
+                             alt_param = lista$fitlca7$npar, 
+                             alt_classes = length(lista$fitlca7$P))[2]
+  
+  
   LMR = round(LMR,0)
   return(LMR)
 }
@@ -204,7 +221,6 @@ gof_LMR_LRT = function(lista = LCA_nemz_id){
 
 
 # 6. kossuk ossze az illeszkedes statisztikakat egy listaba
-
 bind_fit = function(zoznam = LCA_nemz_id){
   
   LCA_bic = gof_bic(lista = zoznam)
@@ -331,11 +347,6 @@ LCA_akkult = fit_LCA_model(formula = formula_akkult)
 
 # 3. model fit
 
-# utana nezni mikor "jo" az entropia ertek
-# vszeg a nagyobb ertek a jobb, de h mi az entropia maximuma,
-# nem vilagos ebbol a bejegyzesbol: https://en.wikipedia.org/wiki/Entropy_(information_theory) 
-
-
 LCA_feny_f_fit = bind_fit(zoznam = LCA_feny_f)
 LCA_feny_hoz_fit = bind_fit(zoznam = LCA_feny_hoz)
 LCA_feny_multi_fit = bind_fit(zoznam = LCA_feny_multi)
@@ -380,7 +391,7 @@ nevek = c("Feny", "Hozzajar", "Multic", "Nemz_ID_egesz", "Nemz_ID_essen", "Dang_
 
 
 library(openxlsx)
-of="2021-01-23_LCA_model_fit_02.xlsx"
+of="2021-01-30_LCA_model_fit_01.xlsx"
 OUT <- createWorkbook()
 for(aaa in 1:length(LCA_fit_list)){
   
@@ -390,16 +401,14 @@ for(aaa in 1:length(LCA_fit_list)){
   
   writeData(OUT, sheet = nevek[aaa], x = "posterior", startCol = 7, startRow = 1, colNames = F)
   
-  for(k in 1:length(LCA_fit_list[[1]])){
+  for(k in 1:length(LCA_fit_list[[1]]$nclasses)){
     writeData(OUT, sheet = nevek[aaa], x = t(posterior_list[[aaa]][[k]]), startCol = 7, startRow = 1+k, colNames = F)
   }
 }
 saveWorkbook(OUT,of)
 
-# 1.)
-# tip: elso blikkre az a GOF tunik jonak, ahol entropia a legmagasabb, 
-# vagy (SA)BIC platora fut. Nezzuk meg ketto kozott melyik relevansabb 
-# indikator a mi esetunkben, es javasoljuk azt.
+# save LCA models
 
-# Q: entropy-nak lehet 2 clusternal is csucsa? 
-# RE: vszeg igen, ha utana folyamatosan csokken.
+saveRDS(LCA_fit_list, file = "LCA_fit_list_nclass7.rds")
+# readRDS(file = "LCA_fit_list_nclass7.rds")
+

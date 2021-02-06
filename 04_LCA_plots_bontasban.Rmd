@@ -1,0 +1,172 @@
+---
+title: "Válaszátlagok bontásban osztályonként"
+date: '2021.02.06'
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r script, echo = FALSE, message=FALSE}
+# import packages 
+library(haven)
+library(ggplot2)
+library(poLCA) 
+library(xlsx)
+library(openxlsx)
+library(tidyLPA)
+library(data.table)
+library(reshape2)
+
+
+# 1.import LCA modells
+
+setwd("C:/Users/Gabor/Documents/00_Vallalkozas/02_PPK/adatok/02_analysis/01_LCA/valaszatlagok")
+
+LCA_fit_list = readRDS(file = "LCA_list_nclass7.rds")
+LCA_fit_list_bontasban = readRDS(file = "LCA_list_nclass7_bontasban.rds")
+
+
+# 2.valaszatlagok abrazolasa
+
+valasz_abra  = function(lista = LCA_fit_list$Sztip_bev, n = 5){
+  
+  clusmemb <- as.factor(lista[[n]]$predclass)
+  manif = lista[[n]]$y
+  
+  manif_list = list()
+  for (i in 1:n){
+    
+    manif_list[[i]] = manif[clusmemb==i,] # kulon df subsetteket kell letrehozni osztalyonkent
+  }
+  
+  mean_list = list()
+  for (j in 1:n){
+    mean_list[[j]] = apply(manif_list[[j]], 2, mean) # osztalyonkenti item atlagok
+  }
+  
+
+  df_m = do.call(cbind.data.frame, mean_list)
+  
+  nevek = c("c1", "c2", "c3", "c4", "c5", "c6")
+  
+  names(df_m) <- nevek[1:n]
+  
+  df_m$Kérdés = rownames(df_m)
+  
+  df_long = reshape2::melt(df_m, id.vars = "Kérdés", variable.name = "Osztály", value.name = "Válasz")
+  
+  # ensure categories are not reordered on x axis
+  df_long$Kérdés <- factor(df_long$Kérdés, levels = unique(df_long$Kérdés)) 
+  
+  # abra
+  abra_atlag <-ggplot2::ggplot(data = df_long, 
+                               aes(x = Kérdés, y = Válasz,
+                                   group = Osztály)) +
+    geom_line(aes(color = Osztály), size=1) +
+    geom_point(aes(color = Osztály, shape = Osztály), size=3) +
+    theme(legend.position="bottom", axis.text.x = element_text(angle = 45, hjust = 1)) +
+    coord_cartesian( ylim = c(1, 5))
+  return(abra_atlag)
+}
+
+```
+
+You can add some text here.
+
+#### *1. ábra: Sztereotípiák bevándorlókkal szemben - moralitás*
+```{r, echo=FALSE}
+Sztip_bev_mor_plot = valasz_abra(lista = LCA_fit_list_bontasban$Sztip_bev_mor, n = 4)
+Sztip_bev_mor_plot
+```
+
+
+#### *2. ábra: Sztereotípiák bevándorlókkal szemben - szociális*
+```{r, echo=FALSE}
+Sztip_bev_soc_plot = valasz_abra(lista = LCA_fit_list_bontasban$Sztip_bev_soc, n = 4)
+Sztip_bev_soc_plot
+```
+
+
+
+#### *3. ábra: Sztereotípiák bevándorlókkal szemben - kompetencia*
+```{r, echo=FALSE}
+Sztip_bev_compet_plot = valasz_abra(lista = LCA_fit_list_bontasban$Sztip_bev_compet, n = 3)
+Sztip_bev_compet_plot
+```
+
+
+#### *4. ábra: Sztereotípiák menekültekkel szemben - moralitás*
+```{r, echo=FALSE}
+Sztip_men_mor_plot = valasz_abra(lista = LCA_fit_list_bontasban$Sztip_men_mor, n = 4)
+Sztip_men_mor_plot
+```
+
+
+#### *5. ábra: Sztereotípiák menekültekkel szemben - szociális*
+```{r, echo=FALSE}
+Sztip_men_soc_plot = valasz_abra(lista = LCA_fit_list_bontasban$Sztip_men_soc, n = 4)
+Sztip_men_soc_plot
+```
+
+
+#### *6. ábra: Sztereotípiák menekültekkel szemben - kompetencia*
+```{r, echo=FALSE}
+Sztip_men_compet_plot = valasz_abra(lista = LCA_fit_list_bontasban$Sztip_men_compet, n = 3)
+Sztip_men_compet_plot
+```
+
+
+
+#### *7. ábra: Sztereotípiák külföldi egyetemistákkal szemben - moralitás*
+```{r, echo=FALSE}
+Sztip_kEgy_mor_plot = valasz_abra(lista = LCA_fit_list_bontasban$Sztip_kEgy_mor, n = 4)
+Sztip_kEgy_mor_plot
+```
+
+
+#### *8. ábra: Sztereotípiák külföldi egyetemistákkal szemben - szociális*
+```{r, echo=FALSE}
+Sztip_kEgy_soc_plot = valasz_abra(lista = LCA_fit_list_bontasban$Sztip_kEgy_soc, n = 4)
+Sztip_kEgy_soc_plot
+```
+
+
+#### *9. ábra: Sztereotípiák külföldi egyetemistákkal szemben - kompetencia*
+```{r, echo=FALSE}
+Sztip_kEgy_compet_plot = valasz_abra(lista = LCA_fit_list_bontasban$Sztip_kEgy_compet, n = 3)
+Sztip_kEgy_compet_plot
+```
+
+
+#### *10. ábra: Fenyegetettség kompozit változó*
+```{r, echo=FALSE}
+Feny_comp_plot = valasz_abra(lista = LCA_fit_list_bontasban$Feny_comp, n = 3)
+Feny_comp_plot
+```
+
+
+#### *11. ábra: Nemzeti identitás kompozit változó*
+```{r, echo=FALSE}
+Nemz_ID_comp_plot = valasz_abra(lista = LCA_fit_list_bontasban$Nemz_ID_comp, n = 2)
+Nemz_ID_comp_plot
+```
+
+
+#### *12. ábra: Fenyegetettség hosszú*
+```{r, echo=FALSE}
+Feny_hosszu_plot = valasz_abra(lista = LCA_fit_list_bontasban$Feny_hosszu, n = 4)
+Feny_hosszu_plot
+```
+
+
+#### *13. ábra: Nemzeti identitás kompozit hosszú*
+```{r, echo=FALSE}
+Nemz_ID_hosszu_plot = valasz_abra(lista = LCA_fit_list_bontasban$Nemz_ID_hosszu, n = 3)
+Nemz_ID_hosszu_plot
+```
+

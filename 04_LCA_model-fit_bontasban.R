@@ -362,10 +362,18 @@ LCA_feny_comp = fit_LCA_model(formula = formula_feny_comp)
 LCA_nemz_id_comp = fit_LCA_model(formula = formula_nemz_id_comp)
 
 # Az LCA-hoz R-ben parameteres elo.kene.
-# hist(nemz_id_comp_egesz) # fura
-# hist(nemz_id_comp_essen)
-# hist(feny_comp)
-# hist(hoz_comp)
+library(purrr)
+library(tidyr)
+library(ggplot2)
+
+df_k[,161:164] %>%
+  keep(is.numeric) %>% 
+  gather() %>% 
+  ggplot(aes(value)) +
+  facet_wrap(~ key, scales = "free") +
+  geom_bar() + 
+  xlab("Válasz") + ylab("Létszám") 
+
 
 LCA_feny_hosszu = fit_LCA_model(formula = formula_feny_hosszu)
 LCA_nemz_id_hosszu = fit_LCA_model(formula = formula_nemz_id_hosszu)
@@ -379,6 +387,25 @@ LCA_sztip_men_compet = fit_LCA_model(formula = formula_sztip_men_compet)
 LCA_sztip_kEgy_mor = fit_LCA_model(formula = formula_sztip_kEgy_mor)
 LCA_sztip_kEgy_soc = fit_LCA_model(formula = formula_sztip_kEgy_soc)
 LCA_sztip_kEgy_compet = fit_LCA_model(formula = formula_sztip_kEgy_compet)
+
+
+
+LCA_list_bontasban = list(LCA_sztip_bev_mor,LCA_sztip_bev_soc,LCA_sztip_bev_compet,
+                          LCA_sztip_men_mor,LCA_sztip_men_soc,LCA_sztip_men_compet,
+                          LCA_sztip_kEgy_mor,LCA_sztip_kEgy_soc,LCA_sztip_kEgy_compet,
+                          LCA_feny_comp,LCA_nemz_id_comp,
+                          LCA_feny_hosszu,LCA_nemz_id_hosszu)
+
+names(LCA_list_bontasban) <- c("Sztip_bev_mor", "Sztip_bev_soc", "Sztip_bev_compet",
+                               "Sztip_men_mor", "Sztip_men_soc", "Sztip_men_compet",
+                               "Sztip_kEgy_mor", "Sztip_kEgy_soc", "Sztip_kEgy_compet",
+                               "Feny_comp", "Nemz_ID_comp",
+                               "Feny_hosszu", "Nemz_ID_hosszu")
+
+saveRDS(LCA_list_bontasban, file = "LCA_nclass7_bontasban.rds")
+# readRDS(file = "LCA_nclass7_bontasban.rds")
+
+
 
 
 # 3. model fit

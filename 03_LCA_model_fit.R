@@ -345,6 +345,17 @@ LCA_szomszed = fit_LCA_model(formula = formula_szomszed)
 LCA_div = fit_LCA_model(formula = formula_div)
 LCA_akkult = fit_LCA_model(formula = formula_akkult)
 
+LCA_list = list(LCA_feny_f,LCA_feny_hoz,LCA_feny_multi,LCA_nemz_id_egesz,LCA_nemz_id_essen,
+                LCA_dang_safe,LCA_dang_coop,LCA_sztip_bev,LCA_sztip_men,LCA_sztip_kEgy,
+                LCA_szomszed,LCA_div,LCA_akkult)
+
+names(LCA_list) <- c("Feny", "Hozzajar", "Multic", "Nemz_ID_egesz", "Nemz_ID_essen", "Dang_safe", "Dang_coop", "Sztip_bev", "Sztip_men", "Sztip_kEgy", "Szomszed", "Diverzitas", "Akkult")
+
+saveRDS(LCA_list, file = "LCA_list_nclass7.rds")
+# readRDS(file = "LCA_list_nclass7.rds")
+
+
+
 # 3. model fit
 
 LCA_feny_f_fit = bind_fit(zoznam = LCA_feny_f)
